@@ -1,0 +1,13 @@
+.node-form .right-form {
+  width: 29%;
+  float: right;
+}
+
+.node-form .main-form {
+  float: left;
+  width: 70%;
+}
+
+.node-form .form-footer {
+  clear: both;
+}

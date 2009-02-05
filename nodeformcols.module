@@ -1,0 +1,131 @@
+<?php
+// $Id$
+
+/**
+ * Implementation of hook_theme()
+ */
+function nodeformcols_theme($aExisting) {
+  return array(
+    // This needs to run after node.module's hook_theme(), which we ensure
+    // by setting this module's weight to 1 during install.
+    'node_form' => array(
+      'template' => 'node-form',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function nodeformcols_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'node_type_form') {
+    $type = $form['#node_type']->type;
+    array_unshift($form['#submit'], '_nodeformcols_content_type_form_submit');
+    
+    $form['nodeformcols_settings'] = array(
+      '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#title' => t('Node form column settings'),
+    );
+    
+    $placements = variable_get('nodeformscols_field_placements_' . $type, _nodeformscols_default_field_placements());
+    $regions = array('main'=>'main','right'=>'right','footer'=>'footer');
+    foreach ($placements as $name => $region) {
+      $form['nodeformcols_settings']['placed_' . $name] = array(
+        '#type' => 'select',
+        '#title' => t('Placement of !name', array(
+            '!name' => $name,
+          )),
+        '#options' => $regions,
+        '#default_value' => $region,
+      );
+    }
+  }
+}
+
+function _nodeformcols_content_type_form_submit($form, &$form_state) {
+  $type = $form['#node_type']->type;
+  $placements = variable_get('nodeformscols_field_placements_' . $type, _nodeformscols_default_field_placements());
+  
+  foreach ($placements as $name => $region) {
+    $field = 'placed_' . $name;
+    if (isset($form_state['values'][$field])) {
+      $region = $form_state['values'][$field];
+      $placements[$name] = $region;
+      unset($form_state['values'][$field]);
+    }
+  }
+  
+  variable_set('nodeformscols_field_placements_' . $type, $placements);
+}
+
+/**
+ * Gets default placements for standard fields
+ *
+ * @return array
+ */
+function _nodeformscols_default_field_placements() {
+  return array(
+    'title' => 'main',
+    'body_field' => 'main',
+    'menu' => 'right',
+    'revision_information' => 'right',
+    'comment_settings' => 'right',
+    'path' => 'right',
+    'options' => 'right',
+    'author' => 'right',
+  );
+}
+
+/**
+ * Preprocess function to run ahead of other modules.
+ */
+function template_preprocess_node_form(&$aVars) {
+  drupal_add_css(drupal_get_path('module', 'nodeformcols') . '/css/nodeformcols.css');
+  
+  $form = &$aVars['form'];
+  
+  $form['section_main'] = array(
+    '#prefix' => '<div class="main-form">',
+    '#suffix' => '</div>',
+    '#weight' => 0,
+  );
+
+  $form['section_right'] = array(
+    '#prefix' => '<div class="right-form">',
+    '#suffix' => '</div>',
+    '#weight' => 1,
+  );
+
+  $form['section_footer'] = array(
+    '#prefix' => '<div class="form-footer">',
+    '#suffix' => '</div>',
+    '#weight' => 2,
+  );
+
+  $rearrange = variable_get('nodeformscols_field_placements_' . $form['#node']->type, _nodeformscols_default_field_placements());
+  $altered = FALSE;
+
+  foreach ($form as $key => $field) {
+    if (substr($key, 0, 1)=='#' || substr($key, 0, 8)=='section_' || 
+        $field['#type']=='value' || $field['#type']=='hidden'|| $field['#type']=='token') {
+      continue;
+    }
+
+    if (isset($rearrange[$key])) {
+      $form['section_' . $rearrange[$key]][$key] = $field;
+      unset($form[$key]);
+    }
+    else {
+      $rearrange[$key] = 'footer';
+      $altered = TRUE;
+      $form['section_footer'][$key] = $field;
+      unset($form[$key]);
+    }
+  }
+  
+  if ($altered) {
+    variable_set('nodeformscols_field_placements_' . $form['#node']->type, $rearrange);
+  }
+}

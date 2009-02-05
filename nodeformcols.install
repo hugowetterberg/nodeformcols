@@ -1,0 +1,10 @@
+<?php
+// $Id$
+
+/**
+ * Implementation of hook_install().
+ */
+function nodeformcols_install() {
+  // We need our hook_theme() to run after node.module's hook_theme().
+  db_query("UPDATE {system} SET weight = %d WHERE name = '%s' AND type = '%s'", 1, 'nodeformcols', 'module');
+}
