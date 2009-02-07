@@ -110,7 +110,7 @@ function template_preprocess_node_form(&$aVars) {
   $placements = nodeformscols_field_placements($form['#node']->type);
 
   foreach ($form as $key => $field) {
-    if (substr($key, 0, 1)=='#' || substr($key, 0, 8)=='section_' || 
+    if (substr($key, 0, 1)=='#' ||
         $field['#type']=='value' || $field['#type']=='hidden'|| $field['#type']=='token') {
       continue;
     }
