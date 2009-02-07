@@ -8,3 +8,32 @@ function nodeformcols_install() {
   // We need our hook_theme() to run after node.module's hook_theme().
   db_query("UPDATE {system} SET weight = %d WHERE name = '%s' AND type = '%s'", 1, 'nodeformcols', 'module');
 }
+
+/**
+ * Updates the old-style placements that only defined region
+ * to the new-style that can specify weight and collapsed state.
+ *
+ * @return void
+ */
+function nodeformcols_update_1() {
+  $ret = array();
+  $res = db_query("SELECT name, value FROM {variable} WHERE name LIKE 'nodeformscols_field_placements_%'");
+  while ($v = db_fetch_object($res)) {
+    $placements = unserialize($v->value);
+    if ($placements) {
+      foreach ($placements as $key => $opt) {
+        if (!is_array($opt)) {
+          $placements[$key] = array('region'=>$opt);
+        }
+      }
+      
+      $result = db_query("UPDATE {variable} SET value='%s' WHERE name='%s'", array(
+        ':value' => serialize($placements),
+        ':name' => $v->name,
+      ));
+      $ret[] = array('success' => $result !== FALSE, 'query' => check_plain('Updated the variable ' . $v->name));
+    }
+  }
+  cache_clear_all('variables','cache');
+  return $ret;
+}

@@ -1,13 +1,13 @@
-.node-form .right-form {
+.node-form .form-region-right {
   width: 29%;
   float: right;
 }
 
-.node-form .main-form {
+.node-form .form-region-main {
   float: left;
   width: 70%;
 }
 
-.node-form .form-footer {
+.node-form .form-region-footer {
   clear: both;
 }
