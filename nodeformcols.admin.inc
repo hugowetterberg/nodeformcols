@@ -111,7 +111,9 @@ function _nodeformcols_configuration_form_after_build($form) {
   
   $regions = nodeformcols_form_regions();
   foreach ($regions as $region => $title) {
-    uasort($form['conf'][$region], "element_sort");
+    if (is_array($form['conf'][$region])) {
+      uasort($form['conf'][$region], "element_sort");
+    }
     drupal_add_tabledrag('fields', 'match', 'sibling', 'field-region-select', 'field-region-'. $region, NULL, FALSE);
     drupal_add_tabledrag('fields', 'order', 'sibling', 'field-weight', 'field-weight-'. $region);
   }
