@@ -106,11 +106,13 @@ function nodeformcols_configuration_form($form_state, $type) {
 
 function _nodeformcols_configuration_form_after_build($form) {
   drupal_add_js('misc/tableheader.js');
+  drupal_add_js(drupal_get_path('module', 'nodeformcols') . '/js/nodeformcols.js');
+  drupal_add_css(drupal_get_path('module', 'nodeformcols') . '/css/nodeformcols.admin.css');
   
   $regions = nodeformcols_form_regions();
   foreach ($regions as $region => $title) {
     uasort($form['conf'][$region], "element_sort");
-    drupal_add_tabledrag('fields', 'match', 'sibling', 'field-region-select', 'field-region-'. $region);
+    drupal_add_tabledrag('fields', 'match', 'sibling', 'field-region-select', 'field-region-'. $region, NULL, FALSE);
     drupal_add_tabledrag('fields', 'order', 'sibling', 'field-weight', 'field-weight-'. $region);
   }
   return $form;
