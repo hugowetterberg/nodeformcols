@@ -3,7 +3,7 @@
 
 function _nodeformcols_get_node_type_form($type) {
   module_load_include('inc', 'node', 'node.pages');
-  
+
   $node = array('uid' => $user->uid, 'name' => (isset($user->name) ? $user->name : ''), 'type' => $type, 'language' => '');
   $nfid = $type . '_node_form';
   $fs = array('storage' => NULL, 'submitted' => FALSE);
@@ -15,41 +15,54 @@ function _nodeformcols_get_node_type_form($type) {
 
 function nodeformcols_update_placements($type, &$placements) {
   $form = _nodeformcols_get_node_type_form($type);
-  
+
   foreach ($form as $key => $field) {
-    if (substr($key, 0, 1)=='#' || substr($key, 0, 8)=='section_' || 
+    if (substr($key, 0, 1)=='#' || substr($key, 0, 8)=='section_' ||
         $field['#type']=='value' || $field['#type']=='hidden'|| $field['#type']=='token') {
       continue;
     }
-    
+
     // Ensure a weight so that we don't have to worry about it later
     $field['#weight'] = isset($field['#weight']) ? $field['#weight'] : 0;
-    
+
     if (!isset($placements[$key])) {
-      // If the element is unknown we'll add it to 
+      // If the element is unknown we'll add it to
       // the field placement list
       $placements[$key] = array(
-        'region' => 'footer', 
+        'region' => 'footer',
         'weight' => $field['#weight'],
       );
     }
     else if (!isset($placements[$key]['weight'])) {
       $placements[$key]['weight'] = $field['#weight'];
     }
-    
-    if (isset($field['#collapsible']) && !isset($placements[$key]['collapsed'])) {
-      $placements[$key]['collapsed'] = isset($field['#collapsed']) && $field['#collapsed'];
+
+    if (isset($field['#collapsible']) && $field['#collapsible']) {
+      if (!isset($placements[$key]['collapsed'])) {
+        $placements[$key]['collapsed'] =  isset($field['#collapsed']) && $field['#collapsed'];
+      }
+    }
+    else {
+      unset($placements[$key]['collapsed']);
+    }
+  }
+
+  // Remove fields that have disappeared from
+  // the placements list.
+  foreach ($placements as $key => $info) {
+    if (!isset($form[$key])) {
+      unset($placements[$key]);
     }
   }
 }
 
 function nodeformcols_configuration_form($form_state, $type) {
-  $placements = nodeformscols_field_placements($type);  
+  $placements = nodeformscols_field_placements($type);
   nodeformcols_update_placements($type, $placements);
   $weight_delta = ceil(count($placements)/2);
-  
+
   $regions = nodeformcols_form_regions();
-  
+
   $form = array();
   $form['type'] = array(
     '#type' => 'value',
@@ -59,7 +72,7 @@ function nodeformcols_configuration_form($form_state, $type) {
   $form['conf'] = array(
     '#theme' => array('nodeformcols_configuration'),
   );
-  
+
   foreach ($placements as $name => $info) {
     $key = 'field_' . $name;
     $weight = isset($info['weight']) ? $info['weight'] : 0;
@@ -86,7 +99,7 @@ function nodeformcols_configuration_form($form_state, $type) {
         ),
       ),
     );
-    
+
     if (isset($info['collapsed'])) {
       $form['conf'][$info['region']][$key][$key . '_collapsed'] = array(
         '#type' => 'checkbox',
@@ -95,12 +108,12 @@ function nodeformcols_configuration_form($form_state, $type) {
       );
     }
   }
-  
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
   );
-  
+
   return $form;
 }
 
@@ -108,7 +121,7 @@ function _nodeformcols_configuration_form_after_build($form) {
   drupal_add_js('misc/tableheader.js');
   drupal_add_js(drupal_get_path('module', 'nodeformcols') . '/js/nodeformcols.js');
   drupal_add_css(drupal_get_path('module', 'nodeformcols') . '/css/nodeformcols.admin.css');
-  
+
   $regions = nodeformcols_form_regions();
   foreach ($regions as $region => $title) {
     if (is_array($form['conf'][$region])) {
@@ -123,9 +136,9 @@ function _nodeformcols_configuration_form_after_build($form) {
 function nodeformcols_configuration_form_submit($form, $form_state) {
   $values = $form_state['values'];
   $type = $values['type'];
-  $placements = nodeformscols_field_placements($type);  
+  $placements = nodeformscols_field_placements($type);
   nodeformcols_update_placements($type, $placements);
-  
+
   foreach ($placements as $name => &$opt) {
     $field = 'field_' . $name;
     $opt['region'] = $values[$field . '_region'];
@@ -134,6 +147,6 @@ function nodeformcols_configuration_form_submit($form, $form_state) {
       $opt['collapsed'] = $values[$field . '_collapsed'];
     }
   }
-  
+
   variable_set('nodeformscols_field_placements_' . $type, $placements);
 }

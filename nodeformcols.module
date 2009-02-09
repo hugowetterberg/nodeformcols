@@ -23,7 +23,7 @@ function nodeformcols_theme($aExisting) {
  */
 function nodeformcols_menu() {
   $items = array();
-  
+
   if (!defined('MAINTENANCE_MODE')) {
     foreach (node_get_types() as $type) {
       $type_name = $type->type;
@@ -39,7 +39,7 @@ function nodeformcols_menu() {
       );
     }
   }
-  
+
   return $items;
 }
 
@@ -93,10 +93,12 @@ function nodeformscols_content_extra_fields($type_name) {
  */
 function template_preprocess_node_form(&$aVars) {
   drupal_add_css(drupal_get_path('module', 'nodeformcols') . '/css/nodeformcols.css');
-  
+
   $form = &$aVars['form'];
-  
+  $class = array('node-form');
+
   $regions = array();
+  $has_elements = array();
   $weight = 0;
   foreach (nodeformcols_form_regions() as $name => $title) {
     $regions[$name] = array(
@@ -114,27 +116,33 @@ function template_preprocess_node_form(&$aVars) {
         $field['#type']=='value' || $field['#type']=='hidden'|| $field['#type']=='token') {
       continue;
     }
-    
+
     if (isset($placements[$key])) {
       $p = $placements[$key];
-      
+
       if (isset($p['weight'])) {
         $field['#weight'] = $p['weight'];
       }
-      if (isset($p['collapsed'])) {
+      if (isset($p['collapsed']) && isset($field['#collapsible']) && $field['#collapsible']) {
         $field['#collapsed'] = $p['collapsed'];
       }
       $regions[$p['region']][$key] = $field;
+      $has_elements[$p['region']] = TRUE;
       unset($form[$key]);
     }
     else {
       $regions['footer'][$key] = $field;
+      $has_elements['footer'] = TRUE;
       unset($form[$key]);
     }
   }
-  
-  
-  foreach ($regions as $name => $def) {
-    $form['nodeformcols_region_' . $name] = $def;
+
+  foreach ($has_elements as $name => $has) {
+    if ($has) {
+      $class[] = 'node-form-has-region-' . $name;
+      $form['nodeformcols_region_' . $name] = $regions[$name];
+    }
   }
+
+  $aVars['class'] = join($class, ' ');
 }

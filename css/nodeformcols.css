@@ -1,13 +1,14 @@
+/* $Id$ */
 .node-form .form-region-right {
   width: 29%;
   float: right;
 }
 
-.node-form .form-region-main {
+.node-form-has-region-right .form-region-main {
   float: left;
   width: 70%;
 }
 
-.node-form .form-region-footer {
+.node-form-has-region-right .form-region-footer {
   clear: both;
 }
