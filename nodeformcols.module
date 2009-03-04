@@ -45,7 +45,7 @@ function nodeformcols_menu() {
 
 function nodeformcols_form_regions() {
   return array(
-    'main' => t('Main'),
+    'main' => t('Main column'),
     'right' => t('Right'),
     'footer' => t('Footer'),
   );
