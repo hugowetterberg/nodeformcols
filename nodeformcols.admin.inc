@@ -37,6 +37,9 @@ function nodeformcols_update_placements($type, &$placements) {
       $placements[$key]['weight'] = $field['#weight'];
     }
 
+    // Get the element title
+    $placements[$key]['title'] = _nodeformcols_get_element_title($field);
+
     if (isset($field['#collapsible']) && $field['#collapsible']) {
       if (!isset($placements[$key]['collapsed'])) {
         $placements[$key]['collapsed'] =  isset($field['#collapsed']) && $field['#collapsed'];
@@ -53,6 +56,15 @@ function nodeformcols_update_placements($type, &$placements) {
     if (!isset($form[$key])) {
       unset($placements[$key]);
     }
+  }
+}
+
+function _nodeformcols_get_element_title($element) {
+  if (!empty($element['#title'])) {
+    return $element['#title'];
+  }
+  if ($element['#type']=='submit') {
+    return $element['#value'];
   }
 }
 
@@ -80,7 +92,7 @@ function nodeformcols_configuration_form($form_state, $type) {
       '#weight' => $weight,
       $key . '_name' => array(
         '#type' => 'markup',
-        '#value' => $name,
+        '#value' => !empty($info['title']) ? $info['title'] : $name,
       ),
       $key . '_region' => array(
         '#type' => 'select',
