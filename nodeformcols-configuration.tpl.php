@@ -1,5 +1,5 @@
 <?php
-  // $Id$
+  // $Id: nodeformcols-configuration.tpl.php,v 1.2 2009/03/04 20:14:55 hugowetterberg Exp $
   $regions = nodeformcols_form_regions();
 ?>
 <table id="fields" class="sticky-enabled">
