@@ -137,6 +137,16 @@ function template_preprocess_node_form(&$aVars) {
     }
   }
 
+  // Ensure that we have the footer wrapper so that
+  // we clear the floating columns
+  if (!$has_elements['footer']) {
+    $has_elements['footer'] = TRUE;
+    $regions['footer'][] = array(
+      '#type' => 'markup',
+      '#value' => '&nbsp;',
+    );
+  }
+
   foreach ($has_elements as $name => $has) {
     if ($has) {
       $class[] = 'node-form-has-region-' . $name;
