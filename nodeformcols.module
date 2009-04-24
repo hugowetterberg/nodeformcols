@@ -174,15 +174,26 @@ function template_preprocess_node_form(&$aVars) {
 function nodeformcols_node_type($op, $info) {
   switch ($op){
     case 'delete':
-      variable_del('nodeformscols_field_placements_'. $info->type);
+      db_query("DELETE FROM {variable} WHERE name LIKE '%s'", array(
+        ':name' => 'nodeformscols_field_placements_'. $info->type . '%',
+      ));
       break;
     case 'update':
       if (!empty($info->old_type) && $info->old_type != $info->type) {
-        $setting = variable_get('nodeformscols_field_placements_'. $info->old_type, FALSE);
-        if ($setting !== FALSE) {
-          variable_set('nodeformscols_field_placements_'. $info->type, $setting);
-          variable_del('nodeformscols_field_placements_'. $info->old_type);
+        $base = 'nodeformscols_field_placements_'. $info->old_type;
+        $new_base = 'nodeformscols_field_placements_'. $info->type;
+        $res = db_query("SELECT name FROM {variable} WHERE name LIKE '%s'", array(
+          ':name' => $base . '%',
+        ));
+
+        while ($old_name = db_result($res)) {
+          $new_name = str_replace($base, $new_base, $old_name);
+          db_query("UPDATE {variable} SET name='%s' WHERE name='%s'", array(
+            ':new' => $new_name,
+            ':old' => $old_name,
+          ));
         }
+        cache_clear_all('variables','cache');
       }
       break;
   }
