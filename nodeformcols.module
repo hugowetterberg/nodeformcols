@@ -31,7 +31,7 @@ function nodeformcols_menu() {
       $items['admin/content/node-type/'. $type_url_str .'/form'] = array(
         'title' => 'Manage form',
         'page callback' => 'drupal_get_form',
-        'page arguments' => array('nodeformcols_configuration_form', $type_name),
+        'page arguments' => array('nodeformcols_configuration_form', $type_name, 5),
         'access arguments' => array('administer content types'),
         'file' => 'nodeformcols.admin.inc',
         'type' => MENU_LOCAL_TASK,
@@ -69,11 +69,20 @@ function _nodeformscols_default_field_placements() {
   );
 }
 
-function nodeformscols_field_placements($content_type) {
-  return variable_get('nodeformscols_field_placements_' . $content_type, _nodeformscols_default_field_placements());
+function nodeformscols_field_placements($content_type, $variant) {
+  $default = _nodeformscols_default_field_placements();
+  if ($variant != 'default') {
+    $default = variable_get('nodeformscols_field_placements_' .
+      $content_type . '_default', $default);
+  }
+
+  $placements = variable_get('nodeformscols_field_placements_' . $content_type .
+    '_' . $variant, $default);
+
+  return $placements;
 }
 
-function nodeformscols_content_extra_fields($type_name) {
+function nodeformscols_content_extra_fields($type_name, $variant) {
   return array(
     'buttons' => array(
       '#title' => t('Buttons'),
@@ -109,7 +118,9 @@ function template_preprocess_node_form(&$aVars) {
     $weight++;
   }
 
-  $placements = nodeformscols_field_placements($form['#node']->type);
+  drupal_alter('nodeformcols_pre_placement', $form);
+  $variant = isset($form['#nodeformcols_variant']) ? $form['#nodeformcols_variant'] : 'default';
+  $placements = nodeformscols_field_placements($form['#node']->type, $variant);
 
   foreach ($form as $key => $field) {
     if (substr($key, 0, 1)=='#' ||
@@ -155,4 +166,35 @@ function template_preprocess_node_form(&$aVars) {
   }
 
   $aVars['class'] = join($class, ' ');
+}
+
+/**
+ * Implementation of hook_node_type().
+ */
+function nodeformcols_node_type($op, $info) {
+  switch ($op){
+    case 'delete':
+      db_query("DELETE FROM {variable} WHERE name LIKE '%s'", array(
+        ':name' => 'nodeformscols_field_placements_'. $info->type . '%',
+      ));
+      break;
+    case 'update':
+      if (!empty($info->old_type) && $info->old_type != $info->type) {
+        $base = 'nodeformscols_field_placements_'. $info->old_type;
+        $new_base = 'nodeformscols_field_placements_'. $info->type;
+        $res = db_query("SELECT name FROM {variable} WHERE name LIKE '%s'", array(
+          ':name' => $base . '%',
+        ));
+
+        while ($old_name = db_result($res)) {
+          $new_name = str_replace($base, $new_base, $old_name);
+          db_query("UPDATE {variable} SET name='%s' WHERE name='%s'", array(
+            ':new' => $new_name,
+            ':old' => $old_name,
+          ));
+        }
+        cache_clear_all('variables','cache');
+      }
+      break;
+  }
 }

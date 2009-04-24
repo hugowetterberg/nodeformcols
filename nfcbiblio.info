@@ -1,0 +1,7 @@
+; $Id$
+name = Biblio compatability
+description = Adds support for biblio fields
+dependencies[] = nodeformcols
+dependencies[] = biblio
+core = 6.x
+package = Node form columns
