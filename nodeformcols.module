@@ -31,7 +31,7 @@ function nodeformcols_menu() {
       $items['admin/content/node-type/'. $type_url_str .'/form'] = array(
         'title' => 'Manage form',
         'page callback' => 'drupal_get_form',
-        'page arguments' => array('nodeformcols_configuration_form', $type_name),
+        'page arguments' => array('nodeformcols_configuration_form', $type_name, 5),
         'access arguments' => array('administer content types'),
         'file' => 'nodeformcols.admin.inc',
         'type' => MENU_LOCAL_TASK,
@@ -69,11 +69,20 @@ function _nodeformscols_default_field_placements() {
   );
 }
 
-function nodeformscols_field_placements($content_type) {
-  return variable_get('nodeformscols_field_placements_' . $content_type, _nodeformscols_default_field_placements());
+function nodeformscols_field_placements($content_type, $variant) {
+  $default = _nodeformscols_default_field_placements();
+  if ($variant != 'default') {
+    $default = variable_get('nodeformscols_field_placements_' .
+      $content_type . '_default', $default);
+  }
+
+  $placements = variable_get('nodeformscols_field_placements_' . $content_type .
+    '_' . $variant, $default);
+
+  return $placements;
 }
 
-function nodeformscols_content_extra_fields($type_name) {
+function nodeformscols_content_extra_fields($type_name, $variant) {
   return array(
     'buttons' => array(
       '#title' => t('Buttons'),
@@ -109,7 +118,9 @@ function template_preprocess_node_form(&$aVars) {
     $weight++;
   }
 
-  $placements = nodeformscols_field_placements($form['#node']->type);
+  drupal_alter('nodeformcols_pre_placement', $form);
+  $variant = isset($form['#nodeformcols_variant']) ? $form['#nodeformcols_variant'] : 'default';
+  $placements = nodeformscols_field_placements($form['#node']->type, $variant);
 
   foreach ($form as $key => $field) {
     if (substr($key, 0, 1)=='#' ||

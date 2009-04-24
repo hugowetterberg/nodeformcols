@@ -37,3 +37,11 @@ function nodeformcols_update_1() {
   cache_clear_all('variables','cache');
   return $ret;
 }
+
+function nodeformcols_update_6100() {
+  db_query("UPDATE {variable} SET name = CONCAT(name, '_default') WHERE name LIKE 'nodeformscols_field_placements_%'");
+  return array(array(
+    'success' => TRUE,
+    'query' => 'Renamed nodeformcol variables',
+  ));
+}

@@ -2,4 +2,4 @@
 name = Node form columns
 description = Separates the node forms into two columns and a footer.
 core = 6.x
-
+package = Node form columns

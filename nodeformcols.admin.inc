@@ -13,8 +13,9 @@ function _nodeformcols_get_node_type_form($type) {
   return $nf;
 }
 
-function nodeformcols_update_placements($type, &$placements) {
+function nodeformcols_update_placements($type, $variant, &$placements) {
   $form = _nodeformcols_get_node_type_form($type);
+  drupal_alter('nodeformcols_base_form', $form, $variant);
 
   foreach ($form as $key => $field) {
     if (substr($key, 0, 1)=='#' || substr($key, 0, 8)=='section_' ||
@@ -68,14 +69,43 @@ function _nodeformcols_get_element_title($element) {
   }
 }
 
-function nodeformcols_configuration_form($form_state, $type) {
-  $placements = nodeformscols_field_placements($type);
-  nodeformcols_update_placements($type, $placements);
+function nodeformcols_configuration_form($form_state, $type, $variant='default') {
+  $variants = array();
+  drupal_alter('nodeformcols_variants', $variants, $type);
+
+  $form = array();
+  if (!empty($variants)) {
+    $variant_links = array(
+      'default' => array(
+        'title' => t('Default'),
+        'href' => 'admin/content/node-type/'. $type .'/form',
+      ),
+    );
+    foreach ($variants as $id => $title) {
+      $variant_links[] = array(
+        'title' => $title,
+        'href' => 'admin/content/node-type/'. $type .'/form/' . $id,
+      );
+    }
+
+    $form['variant'] = array(
+      '#type' => 'item',
+      '#title' => t('Select a form variant'),
+      '#value' => theme('links', $variant_links),
+    );
+  }
+
+  if (empty($variant)) {
+    $variant = 'default';
+  }
+  $form['#variant'] = $variant;
+
+  $placements = nodeformscols_field_placements($type, $variant);
+  nodeformcols_update_placements($type, $variant, $placements);
   $weight_delta = ceil(count($placements)/2);
 
   $regions = nodeformcols_form_regions();
 
-  $form = array();
   $form['type'] = array(
     '#type' => 'value',
     '#value' => $type,
@@ -148,8 +178,8 @@ function _nodeformcols_configuration_form_after_build($form) {
 function nodeformcols_configuration_form_submit($form, $form_state) {
   $values = $form_state['values'];
   $type = $values['type'];
-  $placements = nodeformscols_field_placements($type);
-  nodeformcols_update_placements($type, $placements);
+  $placements = nodeformscols_field_placements($type, $form['#variant']);
+  nodeformcols_update_placements($type, $form['#variant'], $placements);
 
   foreach ($placements as $name => &$opt) {
     $field = 'field_' . $name;
@@ -160,5 +190,6 @@ function nodeformcols_configuration_form_submit($form, $form_state) {
     }
   }
 
-  variable_set('nodeformscols_field_placements_' . $type, $placements);
+  variable_set('nodeformscols_field_placements_' . $type .
+    '_' . $form['#variant'], $placements);
 }
