@@ -148,6 +148,16 @@ function template_preprocess_node_form(&$aVars) {
     }
   }
 
+  // Ensure that we have the footer wrapper so that
+  // we clear the floating columns
+  if (!$has_elements['footer']) {
+    $has_elements['footer'] = TRUE;
+    $regions['footer'][] = array(
+      '#type' => 'markup',
+      '#value' => '&nbsp;',
+    );
+  }
+
   foreach ($has_elements as $name => $has) {
     if ($has) {
       $class[] = 'node-form-has-region-' . $name;
@@ -156,4 +166,24 @@ function template_preprocess_node_form(&$aVars) {
   }
 
   $aVars['class'] = join($class, ' ');
+}
+
+/**
+ * Implementation of hook_node_type().
+ */
+function nodeformcols_node_type($op, $info) {
+  switch ($op){
+    case 'delete':
+      variable_del('nodeformscols_field_placements_'. $info->type);
+      break;
+    case 'update':
+      if (!empty($info->old_type) && $info->old_type != $info->type) {
+        $setting = variable_get('nodeformscols_field_placements_'. $info->old_type, FALSE);
+        if ($setting !== FALSE) {
+          variable_set('nodeformscols_field_placements_'. $info->type, $setting);
+          variable_del('nodeformscols_field_placements_'. $info->old_type);
+        }
+      }
+      break;
+  }
 }
