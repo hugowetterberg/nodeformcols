@@ -1,0 +1,7 @@
+; $Id$
+name = CAPTCHA compatability
+description = Adds support for CAPTCHA in node forms
+dependencies[] = nodeformcols
+dependencies[] = captcha
+core = 6.x
+package = Node form columns
