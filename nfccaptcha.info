@@ -1,4 +1,4 @@
-; $Id$
+; $Id: nfccaptcha.info,v 1.1 2009/04/25 09:56:27 hugowetterberg Exp $
 name = CAPTCHA compatability
 description = Adds support for CAPTCHA in node forms
 dependencies[] = nodeformcols
