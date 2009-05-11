@@ -103,6 +103,7 @@ function nodeformscols_content_extra_fields($type_name, $variant) {
 function template_preprocess_node_form(&$aVars) {
   drupal_add_css(drupal_get_path('module', 'nodeformcols') . '/css/nodeformcols.css');
 
+  $default_region = variable_get('nodeformcols_default_region', 'footer');
   $form = &$aVars['form'];
   $class = array('node-form');
 
@@ -121,6 +122,17 @@ function template_preprocess_node_form(&$aVars) {
   drupal_alter('nodeformcols_pre_placement', $form);
   $variant = isset($form['#nodeformcols_variant']) ? $form['#nodeformcols_variant'] : 'default';
   $placements = nodeformscols_field_placements($form['#node']->type, $variant);
+
+  // Keep track of where the buttons will be placed
+  // so that new fields won't be placed below them
+  // TODO: This should be generalized to a way to tell nodeformcols where to place new fields (above below field X).
+  $buttons = isset($placements['buttons']) ?
+    $placements['buttons'] :
+    array(
+      'weight' => $form['buttons']['#weight'],
+      'region' => $default_region,
+    );
+  $adjust_to_buttons = $buttons['region'] == $default_region;
 
   foreach ($form as $key => $field) {
     if (substr($key, 0, 1)=='#' ||
@@ -141,9 +153,12 @@ function template_preprocess_node_form(&$aVars) {
       $has_elements[$p['region']] = TRUE;
       unset($form[$key]);
     }
-    else {
-      $regions['footer'][$key] = $field;
-      $has_elements['footer'] = TRUE;
+    else { // Set the default placement for unknown fields
+      $regions[$default_region][$key] = $field;
+      if ($adjust_to_buttons) {
+        $regions[$default_region][$key]['#weight'] = $buttons['weight'] - 1;
+      }
+      $has_elements[$default_region] = TRUE;
       unset($form[$key]);
     }
   }
