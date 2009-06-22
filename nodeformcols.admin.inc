@@ -16,6 +16,7 @@ function _nodeformcols_get_node_type_form($type) {
 function nodeformcols_update_placements($type, $variant, &$placements) {
   $form = _nodeformcols_get_node_type_form($type);
   drupal_alter('nodeformcols_base_form', $form, $variant);
+  $default_region = variable_get('nodeformcols_default_region', 'footer');
 
   foreach ($form as $key => $field) {
     if (substr($key, 0, 1)=='#' || substr($key, 0, 8)=='section_' ||
@@ -30,13 +31,19 @@ function nodeformcols_update_placements($type, $variant, &$placements) {
       // If the element is unknown we'll add it to
       // the field placement list
       $placements[$key] = array(
-        'region' => 'footer',
+        'region' => $default_region,
         'weight' => $field['#weight'],
       );
+      // Make sure that we don't auto-place the field below the buttons.
+      if ($placements['buttons']['region'] == $default_region) {
+        $placements[$key]['weight'] = $placements['buttons']['weight'] - 1;
+      }
     }
     else if (!isset($placements[$key]['weight'])) {
       $placements[$key]['weight'] = $field['#weight'];
     }
+
+    $placements[$key]['has_required'] = _nodeformcols_has_required($field);
 
     // Get the element title
     $placements[$key]['title'] = _nodeformcols_get_element_title($field);
@@ -142,6 +149,14 @@ function nodeformcols_configuration_form($form_state, $type, $variant='default')
       ),
     );
 
+    if (!$info['has_required']) {
+      $form['conf'][$info['region']][$key][$key . '_hidden'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Hide'),
+        '#default_value' => $info['hidden'],
+      );
+    }
+
     if (isset($info['collapsed'])) {
       $form['conf'][$info['region']][$key][$key . '_collapsed'] = array(
         '#type' => 'checkbox',
@@ -157,6 +172,25 @@ function nodeformcols_configuration_form($form_state, $type, $variant='default')
   );
 
   return $form;
+}
+
+/**
+ * Checks if a form element or any of it's children are required
+ *
+ * @param array $element
+ * @return bool
+ */
+function _nodeformcols_has_required($element) {
+  if (isset($element['#required']) && $element['#required']) {
+    return TRUE;
+  }
+  $children = element_children($element);
+  foreach ($children as $child) {
+    if (_nodeformcols_has_required($element[$child])) {
+      return TRUE;
+    }
+  }
+  return FALSE;
 }
 
 function _nodeformcols_configuration_form_after_build($form) {
@@ -185,6 +219,9 @@ function nodeformcols_configuration_form_submit($form, $form_state) {
     $field = 'field_' . $name;
     $opt['region'] = $values[$field . '_region'];
     $opt['weight'] = $values[$field . '_weight'];
+    if (isset($values[$field . '_hidden'])) {
+      $opt['hidden'] = $values[$field . '_hidden'];
+    }
     if (isset($values[$field . '_collapsed'])) {
       $opt['collapsed'] = $values[$field . '_collapsed'];
     }
