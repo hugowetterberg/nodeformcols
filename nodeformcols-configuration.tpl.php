@@ -33,6 +33,9 @@
             if ($data[$field . '_collapsed']) {
               print drupal_render($data[$field . '_collapsed']);
             }
+            if ($data[$field . '_hidden']) {
+              print drupal_render($data[$field . '_hidden']);
+            }
           ?></td>
           <td><?php print drupal_render($data[$field . '_region']) ?></td>
           <td><?php print drupal_render($data[$field . '_weight']) ?></td>

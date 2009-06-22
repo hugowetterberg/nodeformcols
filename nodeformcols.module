@@ -146,6 +146,9 @@ function template_preprocess_node_form(&$aVars) {
       if (isset($p['weight'])) {
         $field['#weight'] = $p['weight'];
       }
+      if (isset($p['hidden']) && $p['hidden']) {
+        $field['#access'] = (!isset($field['#access']) || $field['#access']) && !$p['hidden'];
+      }
       if (isset($p['collapsed']) && isset($field['#collapsible']) && $field['#collapsible']) {
         $field['#collapsed'] = $p['collapsed'];
       }
