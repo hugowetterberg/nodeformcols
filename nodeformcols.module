@@ -100,6 +100,23 @@ function nodeformscols_content_extra_fields($type_name, $variant) {
 }
 
 /**
+ * Implementation of hook_form_alter().
+ */
+function nodeformcols_form_alter(&$form, $form_state, $form_id) {
+  if ('node-form' == $form['#id']) {
+    drupal_alter('nodeformcols_pre_form', $form);
+    $variant = isset($form['#nodeformcols_variant']) ? $form['#nodeformcols_variant'] : 'default';
+    $placements = nodeformscols_field_placements($form['#node']->type, $variant);
+    foreach ($placements as $key => $p) {
+      if (isset($p['hidden']) && $p['hidden']) {
+        $form[$key]['#access'] = FALSE;
+      }
+    }
+    drupal_alter('nodeformcols_post_form', $form);
+  }
+}
+
+/**
  * Preprocess function to run ahead of other modules.
  */
 function template_preprocess_node_form(&$aVars) {
@@ -140,9 +157,6 @@ function template_preprocess_node_form(&$aVars) {
 
       if (isset($p['weight'])) {
         $field['#weight'] = $p['weight'];
-      }
-      if (isset($p['hidden']) && $p['hidden']) {
-        $field['#access'] = (!isset($field['#access']) || $field['#access']) && !$p['hidden'];
       }
       if (isset($p['collapsed']) && isset($field['#collapsible']) && $field['#collapsible']) {
         $field['#collapsed'] = $p['collapsed'];
