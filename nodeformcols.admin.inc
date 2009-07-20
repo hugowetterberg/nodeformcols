@@ -16,7 +16,7 @@ function _nodeformcols_get_node_type_form($type) {
 function nodeformcols_update_placements($type, $variant, &$placements) {
   $form = _nodeformcols_get_node_type_form($type);
   drupal_alter('nodeformcols_base_form', $form, $variant);
-  $default_region = variable_get('nodeformcols_default_region', 'footer');
+  $default_region = variable_get('nodeformcols_default_region', NODEFORMCOLS_DEFAULT_REGION);
 
   foreach ($form as $key => $field) {
     if (substr($key, 0, 1)=='#' || substr($key, 0, 8)=='section_' ||
@@ -35,8 +35,8 @@ function nodeformcols_update_placements($type, $variant, &$placements) {
         'weight' => $field['#weight'],
       );
       // Make sure that we don't auto-place the field below the buttons.
-      if ($placements['buttons']['region'] == $default_region) {
-        $placements[$key]['weight'] = $placements['buttons']['weight'] - 1;
+      if ($placements['buttons']['region'] == $default_region && $placements[$key]['weight'] >= $placements['buttons']['weight']) {
+        $placements[$key]['weight'] = $placements['buttons']['weight'] - .1;
       }
     }
     else if (!isset($placements[$key]['weight'])) {
@@ -109,7 +109,6 @@ function nodeformcols_configuration_form($form_state, $type, $variant='default')
 
   $placements = nodeformscols_field_placements($type, $variant);
   nodeformcols_update_placements($type, $variant, $placements);
-  $weight_delta = ceil(count($placements)/2);
 
   $regions = nodeformcols_form_regions();
 
@@ -140,9 +139,9 @@ function nodeformcols_configuration_form($form_state, $type, $variant='default')
         ),
       ),
       $key . '_weight' => array(
-        '#type' => 'weight',
-        '#weight_delta' => $weight_delta,
+        '#type' => 'textfield',
         '#default_value' => $weight,
+        '#size' => 3,
         '#attributes' => array(
           'class' => 'field-weight field-weight-'. $info['region'],
         ),

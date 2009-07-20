@@ -41,16 +41,16 @@ function _nfcbiblio_top_visible_type() {
 }
 
 /**
- * Implementation of hook_nodeformcols_pre_placement_alter().
+ * Implementation of hook_nodeformcols_pre_form_alter().
  *
- * Implement this hook to tell nodeformcols what variant the form is before the
- * placements are loaded.
+ * Implement this hook to tell nodeformcols what variant the form is before
+ * any alterations to the form is made.
  *
  * @param array $form
  *  The form.
  * @return void
  */
-function nfcbiblio_nodeformcols_pre_placement_alter(&$form) {
+function nfcbiblio_nodeformcols_pre_form_alter(&$form) {
   if ($form['#node']->type == 'biblio') {
     if (!empty($form['biblio_type']['#value'])) {
       $form['#nodeformcols_variant'] = $form['biblio_type']['#value'];
