@@ -1,5 +1,5 @@
 <?php
-// $Id: nodeformcols.admin.inc,v 1.4 2009/06/22 07:30:32 hugowetterberg Exp $
+// $Id: nodeformcols.admin.inc,v 1.5 2009/07/20 13:37:16 hugowetterberg Exp $
 
 function _nodeformcols_get_node_type_form($type) {
   module_load_include('inc', 'node', 'node.pages');
