@@ -18,7 +18,7 @@
         <td colspan="4" class="region"><?php print $title; ?></td>
       </tr>
       <tr class="region-message region-<?php print $region?>-message <?php print empty($element[$region]) ? 'region-empty' : 'region-populated'; ?>">
-        <td colspan="4"><em><?php print t('No blocks in this region'); ?></em></td>
+        <td colspan="4"><em><?php print t('No fields in this region'); ?></em></td>
       </tr>
       <?php if (!empty($element[$region])): ?>
         <?php foreach ($element[$region] as $field => $data): ?>
