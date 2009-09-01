@@ -1,4 +1,4 @@
-// $Id: nodeformcols.js,v 1.2 2009/03/04 20:14:56 hugowetterberg Exp $
+// $Id: nodeformcols.js,v 1.3 2009/09/01 18:20:57 hugowetterberg Exp $
 
 /**
  * Move a field in the fields table from one region to another via select list.
