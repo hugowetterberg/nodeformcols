@@ -27,7 +27,7 @@ Drupal.behaviors.fieldDrag = function(context) {
       var regionRow = $(dragObject.rowObject.element).prev('tr').get(0);
       var regionName = regionRow.className.replace(/([^ ]+[ ]+)*region-([^ ]+)-message([ ]+[^ ]+)*/, '$2');
       var regionField = $('select.field-region-select', dragObject.rowObject.element);
-      var weightField = $('select.field-weight', dragObject.rowObject.element);
+      var weightField = $('input.field-weight', dragObject.rowObject.element);
       var oldRegionName = weightField[0].className.replace(/([^ ]+[ ]+)*field-weight-([^ ]+)([ ]+[^ ]+)*/, '$2');
 
       if (!regionField.is('.field-region-'+ regionName)) {
