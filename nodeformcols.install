@@ -2,6 +2,11 @@
 // $Id$
 
 /**
+ * @file
+ * Install and update hooks
+ */
+
+/**
  * Implementation of hook_install().
  */
 function nodeformcols_install() {
@@ -33,10 +38,10 @@ function nodeformcols_update_1() {
     if ($placements) {
       foreach ($placements as $key => $opt) {
         if (!is_array($opt)) {
-          $placements[$key] = array('region'=>$opt);
+          $placements[$key] = array('region' => $opt);
         }
       }
-      
+
       $result = db_query("UPDATE {variable} SET value='%s' WHERE name='%s'", array(
         ':value' => serialize($placements),
         ':name' => $v->name,
@@ -44,7 +49,7 @@ function nodeformcols_update_1() {
       $ret[] = array('success' => $result !== FALSE, 'query' => check_plain('Updated the variable ' . $v->name));
     }
   }
-  cache_clear_all('variables','cache');
+  cache_clear_all('variables', 'cache');
   return $ret;
 }
 

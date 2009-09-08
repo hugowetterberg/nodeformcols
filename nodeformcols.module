@@ -3,7 +3,7 @@
 define('NODEFORMCOLS_DEFAULT_REGION', 'main');
 
 /**
- * Implementation of hook_theme()
+ * Implementation of hook_theme().
  */
 function nodeformcols_theme($aExisting) {
   return array(
@@ -14,7 +14,7 @@ function nodeformcols_theme($aExisting) {
     ),
     'nodeformcols_configuration' => array(
       'template' => 'nodeformcols-configuration',
-      'arguments' => array('element'=>array()),
+      'arguments' => array('element' => array()),
     ),
   );
 }
@@ -199,7 +199,7 @@ function template_preprocess_node_form(&$aVars) {
  * Implementation of hook_node_type().
  */
 function nodeformcols_node_type($op, $info) {
-  switch ($op){
+  switch ($op) {
     case 'delete':
       db_query("DELETE FROM {variable} WHERE name LIKE '%s'", array(
         ':name' => 'nodeformscols_field_placements_'. $info->type . '%',
@@ -220,7 +220,7 @@ function nodeformcols_node_type($op, $info) {
             ':old' => $old_name,
           ));
         }
-        cache_clear_all('variables','cache');
+        cache_clear_all('variables', 'cache');
       }
       break;
   }

@@ -1,6 +1,11 @@
 <?php
 // $Id$
 
+/**
+ * @file
+ * Contains the admin functions for Node form columns
+ */
+
 function _nodeformcols_get_node_type_form($type) {
   module_load_include('inc', 'node', 'node.pages');
 
@@ -19,7 +24,7 @@ function nodeformcols_update_placements($type, $variant, &$placements) {
   $default_region = variable_get('nodeformcols_default_region', NODEFORMCOLS_DEFAULT_REGION);
 
   foreach ($form as $key => $field) {
-    if (substr($key, 0, 1)=='#' || substr($key, 0, 8)=='section_' ||
+    if (substr($key, 0, 1) == '#' || substr($key, 0, 8) == 'section_' ||
         $field['#type']=='value' || $field['#type']=='hidden'|| $field['#type']=='token') {
       continue;
     }
@@ -39,7 +44,7 @@ function nodeformcols_update_placements($type, $variant, &$placements) {
         $placements[$key]['weight'] = $placements['buttons']['weight'] - .1;
       }
     }
-    else if (!isset($placements[$key]['weight'])) {
+    elseif (!isset($placements[$key]['weight'])) {
       $placements[$key]['weight'] = $field['#weight'];
     }
 
