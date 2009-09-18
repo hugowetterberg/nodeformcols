@@ -44,6 +44,15 @@ function nodeformcols_menu() {
   return $items;
 }
 
+/**
+ * Implementation of hook_ctools_plugin_directory().
+ */
+function nodeformcols_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools') {
+    return 'plugins/' . $plugin;
+  }
+}
+
 function nodeformcols_form_regions() {
   return array(
     'main' => t('Main column'),
