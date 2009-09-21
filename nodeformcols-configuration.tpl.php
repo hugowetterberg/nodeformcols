@@ -1,6 +1,12 @@
 <?php
-  // $Id: nodeformcols-configuration.tpl.php,v 1.4 2009/09/01 18:20:57 hugowetterberg Exp $
-  $regions = nodeformcols_form_regions();
+// $Id: nodeformcols-configuration.tpl.php,v 1.4 2009/09/01 18:20:57 hugowetterberg Exp $
+
+/**
+ * @file
+ * Template for the configuration table
+ */
+
+$regions = nodeformcols_form_regions();
 ?>
 <table id="fields" class="sticky-enabled">
   <thead>
