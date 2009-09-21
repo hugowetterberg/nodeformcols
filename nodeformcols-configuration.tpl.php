@@ -1,5 +1,5 @@
 <?php
-// $Id: nodeformcols-configuration.tpl.php,v 1.4 2009/09/01 18:20:57 hugowetterberg Exp $
+// $Id: nodeformcols-configuration.tpl.php,v 1.5 2009/09/21 06:09:54 hugowetterberg Exp $
 
 /**
  * @file
