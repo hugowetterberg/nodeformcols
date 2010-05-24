@@ -157,7 +157,7 @@ function template_preprocess_node_form(&$aVars) {
 
   foreach ($form as $key => $field) {
     if (substr($key, 0, 1)=='#' ||
-        $field['#type']=='value' || $field['#type']=='hidden'|| $field['#type']=='token') {
+        $field['#type']=='value' || $field['#type']=='hidden'|| $field['#type']=='token' || (isset($field['#access']) && $field['#access'] == FALSE)) {
       continue;
     }
 
