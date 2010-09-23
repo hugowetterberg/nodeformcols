@@ -7,5 +7,5 @@
  */
 ?>
 <div class="<?php print $class; ?>">
-  <?php print drupal_render($form); ?>
+  <?php print drupal_render_children($form); ?>
 </div>

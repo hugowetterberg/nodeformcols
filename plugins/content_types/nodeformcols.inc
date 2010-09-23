@@ -70,7 +70,7 @@ function nodeformcols_nodeformcols_content_type_admin_info($subtype, $conf) {
   $block = new stdClass();
   $block->title = t('Affected forms');
 
-  $types = node_get_types();
+  $types = node_type_get_types();
   $forms = array();
   foreach ($types as $type => $description) {
     if (variable_get('nodeformscols_field_placements_' . $type . '_default', FALSE)) {
@@ -79,10 +79,10 @@ function nodeformcols_nodeformcols_content_type_admin_info($subtype, $conf) {
   }
 
   if (!empty($forms)) {
-    $block->content = theme('item_list', $forms);
+    $block->content = theme('item_list', array('items' => $forms));
   }
   else {
-    $block->content = '<p>'. t('No forms are using customized nodeformcols settings.') .'</p>';
+    $block->content = '<p>' . t('No forms are using customized nodeformcols settings.') . '</p>';
   }
   return $block;
 }

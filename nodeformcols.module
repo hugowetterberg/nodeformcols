@@ -10,11 +10,12 @@ function nodeformcols_theme($aExisting) {
     // This needs to run after node.module's hook_theme(), which we ensure
     // by setting this module's weight to 1 during install.
     'node_form' => array(
+      'render element' => 'form',
       'template' => 'node-form',
     ),
     'nodeformcols_configuration' => array(
+      'render element' => 'element',
       'template' => 'nodeformcols-configuration',
-      'arguments' => array('element' => array()),
     ),
   );
 }
@@ -26,19 +27,15 @@ function nodeformcols_menu() {
   $items = array();
 
   if (!defined('MAINTENANCE_MODE')) {
-    foreach (node_get_types() as $type) {
-      $type_name = $type->type;
-      $type_url_str = str_replace('_', '-', $type_name);
-      $items['admin/content/node-type/'. $type_url_str .'/form'] = array(
-        'title' => 'Manage form',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('nodeformcols_configuration_form', $type_name, 5),
-        'access arguments' => array('administer content types'),
-        'file' => 'nodeformcols.admin.inc',
-        'type' => MENU_LOCAL_TASK,
-        'weight' => 3
-      );
-    }
+    $items['admin/structure/types/manage/%node_type/form'] = array(
+      'title' => 'Manage form',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('nodeformcols_configuration_form', 4, 6),
+      'access arguments' => array('administer content types'),
+      'file' => 'nodeformcols.admin.inc',
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 3,
+    );
   }
 
   return $items;
@@ -69,14 +66,8 @@ function nodeformcols_form_regions() {
 function _nodeformscols_default_field_placements() {
   return array(
     'title' => array('region' => 'main'),
-    'body_field' => array('region' => 'main'),
-    'menu' => array('region' => 'right'),
-    'revision_information' => array('region' => 'right'),
-    'comment_settings' => array('region' => 'right'),
-    'path' => array('region' => 'right'),
-    'options' => array('region' => 'right'),
-    'author' => array('region' => 'right'),
-    'buttons' => array('region' => NODEFORMCOLS_DEFAULT_REGION, 'weight' => 100),
+    'additional_settings' => array('region' => 'main'),
+    'actions' => array('region' => NODEFORMCOLS_DEFAULT_REGION, 'weight' => 100),
   );
 }
 
@@ -91,21 +82,6 @@ function nodeformscols_field_placements($content_type, $variant) {
     '_' . $variant, $default);
 
   return $placements;
-}
-
-function nodeformscols_content_extra_fields($type_name, $variant) {
-  return array(
-    'buttons' => array(
-      '#title' => t('Buttons'),
-      '#description' => t('Save, preview and delete buttons.'),
-      '#weight' => 50,
-    ),
-    'options' => array(
-      '#title' => t('Workflow options'),
-      '#description' => t('Options for publishing, sticky and publish on front page.'),
-      '#weight' => 0,
-    ),
-  );
 }
 
 /**
@@ -133,7 +109,7 @@ function template_preprocess_node_form(&$aVars) {
 
   $default_region = variable_get('nodeformcols_default_region', NODEFORMCOLS_DEFAULT_REGION);
   $form = &$aVars['form'];
-  $class = array('node-form');
+  $class = array('node-form', 'clearfix');
 
   $regions = array();
   $has_elements = array();
@@ -153,11 +129,11 @@ function template_preprocess_node_form(&$aVars) {
 
   // Track if new fields should be adjusted above the buttons.
   // TODO: This should be generalized to a way to tell nodeformcols where to place new fields (above below field X).
-  $adjust_to_buttons = $placements['buttons']['region'] == $default_region;
+  $adjust_to_buttons = isset($placements['buttons']['region']) && ($placements['buttons']['region'] == $default_region);
 
-  foreach ($form as $key => $field) {
-    if (substr($key, 0, 1)=='#' ||
-        $field['#type']=='value' || $field['#type']=='hidden'|| $field['#type']=='token') {
+  foreach (element_children($form) as $key) {
+    $field = $form[$key];
+    if (isset($field['#type']) && in_array($field['#type'], array('value', 'hidden', 'token'))) {
       continue;
     }
 
@@ -184,16 +160,6 @@ function template_preprocess_node_form(&$aVars) {
     }
   }
 
-  // Ensure that we have the footer wrapper so that
-  // we clear the floating columns
-  if (!$has_elements['footer']) {
-    $has_elements['footer'] = TRUE;
-    $regions['footer'][] = array(
-      '#type' => 'markup',
-      '#value' => '&nbsp;',
-    );
-  }
-
   foreach ($has_elements as $name => $has) {
     if ($has) {
       $class[] = 'node-form-has-region-' . $name;
@@ -205,32 +171,34 @@ function template_preprocess_node_form(&$aVars) {
 }
 
 /**
- * Implementation of hook_node_type().
+ * Implementation of hook_node_type_delete().
  */
-function nodeformcols_node_type($op, $info) {
-  switch ($op) {
-    case 'delete':
-      db_query("DELETE FROM {variable} WHERE name LIKE '%s'", array(
-        ':name' => 'nodeformscols_field_placements_'. $info->type . '%',
-      ));
-      break;
-    case 'update':
-      if (!empty($info->old_type) && $info->old_type != $info->type) {
-        $base = 'nodeformscols_field_placements_'. $info->old_type;
-        $new_base = 'nodeformscols_field_placements_'. $info->type;
-        $res = db_query("SELECT name FROM {variable} WHERE name LIKE '%s'", array(
-          ':name' => $base . '%',
-        ));
+function nodeformcols_node_type_delete($info) {
+  $result = db_select('variable')
+    ->condition('name', 'nodeformscols_field_placements_' . $info->old_type . '%', 'LIKE')
+    ->fields('variable', array('name'))
+    ->execute();
+  foreach ($result as $row) {
+    variable_del($row->name);
+  }
+}
 
-        while ($old_name = db_result($res)) {
-          $new_name = str_replace($base, $new_base, $old_name);
-          db_query("UPDATE {variable} SET name='%s' WHERE name='%s'", array(
-            ':new' => $new_name,
-            ':old' => $old_name,
-          ));
-        }
-        cache_clear_all('variables', 'cache');
-      }
-      break;
+/**
+ * Implementation of hook_node_type_update().
+ */
+function nodeformcols_node_type_update($info) {
+  if (!empty($info->old_type) && $info->old_type != $info->type) {
+    $base = 'nodeformscols_field_placements_' . $info->old_type;
+    $new_base = 'nodeformscols_field_placements_' . $info->type;
+    $result = db_select('variable')
+      ->condition('name', $base . '%', 'LIKE')
+      ->fields('variable', array('name'))
+      ->execute();
+    foreach ($result as $row) {
+      $value = variable_get($row->name, NULL);
+      $new_name = str_replace($base, $new_base, $row->name);
+      variable_set($new_name, $value);
+      variable_del($row->name);
+    }
   }
 }
