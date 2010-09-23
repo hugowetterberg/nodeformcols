@@ -2,7 +2,7 @@
 // $Id$
 
 /**
- * Implementation of hook_nodeformcols_variants_alter().
+ * Implements hook_nodeformcols_variants_alter().
  *
  * Implement this hook to supply information about form variants that can be
  * configured.
@@ -17,9 +17,9 @@ function nfcbiblio_nodeformcols_variants_alter(&$variants, $type) {
   if ($type == 'biblio') {
     $res = db_query('SELECT tid, name
       FROM {biblio_types}
-      WHERE tid >= 0
-        AND visible = 1
-      ORDER BY weight ASC');
+      WHERE tid >= :tid
+        AND visible = :visible
+      ORDER BY weight ASC', array(':tid' => 0, ':visible' => 1));
     while ($option = db_fetch_object($res)) {
       $variants[$option->tid] = $option->name;
     }
@@ -33,15 +33,15 @@ function nfcbiblio_nodeformcols_variants_alter(&$variants, $type) {
  *  The id of a default biblio type
  */
 function _nfcbiblio_top_visible_type() {
-  return db_result(db_query_range("SELECT tid
+  return db_query_range("SELECT tid
     FROM {biblio_types}
-    WHERE visible = 1
-      AND tid>=0
-    ORDER BY weight ASC", 0, 1));
+    WHERE visible = :visible
+      AND tid> = :tid>
+    ORDER BY weight ASC", array(':visible' => 1, ':tid>' => 0))->fetchField();
 }
 
 /**
- * Implementation of hook_nodeformcols_pre_form_alter().
+ * Implements hook_nodeformcols_pre_form_alter().
  *
  * Implement this hook to tell nodeformcols what variant the form is before
  * any alterations to the form is made.
@@ -59,7 +59,7 @@ function nfcbiblio_nodeformcols_pre_form_alter(&$form) {
 }
 
 /**
- * Implementation of hook_nodeformcols_base_form_alter().
+ * Implements hook_nodeformcols_base_form_alter().
  *
  * Implement this hook if you want to alter the node creation form that
  * nodeformcols uses to construct the configuration interface before
@@ -79,7 +79,7 @@ function nfcbiblio_nodeformcols_base_form_alter(&$form, $variant) {
 
     $biblio_form_state = array();
     $biblio_form_state['post']['biblio_type'] = $variant;
-    foreach(biblio_form($form['#node'], $biblio_form_state) as $name => $def) {
+    foreach (biblio_form($form['#node'], $biblio_form_state) as $name => $def) {
       $form[$name] = $def;
     }
   }
