@@ -6,7 +6,9 @@
  * This behavior is dependent on the tableDrag behavior, since it uses the
  * objects initialized in that behavior to update the row.
  */
-Drupal.behaviors.fieldDrag = function(context) {
+(function($) {
+Drupal.behaviors.fieldDrag = {};
+Drupal.behaviors.fieldDrag.attach = function(context) {
   var table = $('table#fields');
   var tableDrag = Drupal.tableDrag.fields; // Get the fields tableDrag object.
 
@@ -93,3 +95,4 @@ Drupal.behaviors.fieldDrag = function(context) {
     });
   };
 };
+} (jQuery));
