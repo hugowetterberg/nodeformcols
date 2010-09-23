@@ -15,10 +15,10 @@
  * @return void
  */
 function nodeformcols_nodeformcols_base_form_alter(&$form, $variant) {
-  $using_captcha = db_result(db_query("SELECT COUNT(module)
-    FROM {captcha_points} WHERE form_id = '%s'", array(
+  $using_captcha = db_query("SELECT COUNT(module)
+    FROM {captcha_points} WHERE form_id = :form_id", array(':form_id' => array(
       ':form_id' => $form['#node']->type . '_node_form',
-  )));
+    )))->fetchField();
   if ($using_captcha) {
     $form['captcha'] = array(
       '#title' => t('CAPTCHA'),

@@ -3,5 +3,5 @@ name = CAPTCHA compatability
 description = Adds support for CAPTCHA in node forms
 dependencies[] = nodeformcols
 dependencies[] = captcha
-core = 6.x
+core = 7.x
 package = Node form columns
