@@ -6,18 +6,15 @@
  * This behavior is dependent on the tableDrag behavior, since it uses the
  * objects initialized in that behavior to update the row.
  */
-Drupal.behaviors.fieldDrag = function(context) {
+(function($) {
+Drupal.behaviors.fieldDrag = {};
+Drupal.behaviors.fieldDrag.attach = function(context) {
   var table = $('table#fields');
   var tableDrag = Drupal.tableDrag.fields; // Get the fields tableDrag object.
 
   // Add a handler for when a row is swapped, update empty regions.
   tableDrag.row.prototype.onSwap = function(swappedRow) {
     checkEmptyRegions(table, this);
-  };
-
-  // A custom message for the fields page specifically.
-  Drupal.theme.tableDragChangedWarning = function () {
-    return '<div class="warning">' + Drupal.theme('tableDragChangedMarker') + ' ' + Drupal.t("The changes to these fields will not be saved until the <em>Save fields</em> button is clicked.") + '</div>';
   };
 
   // Add a handler so when a row is dropped, update fields dropped into new regions.
@@ -93,3 +90,4 @@ Drupal.behaviors.fieldDrag = function(context) {
     });
   };
 };
+} (jQuery));

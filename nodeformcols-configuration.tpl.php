@@ -36,10 +36,10 @@ $regions = nodeformcols_form_regions();
         <tr class="draggable <?php print $row % 2 == 0 ? 'odd' : 'even'; ?>">
           <td><?php print drupal_render($data[$field . '_name']) ?></td>
           <td><?php
-            if ($data[$field . '_collapsed']) {
+            if (isset($data[$field . '_collapsed'])) {
               print drupal_render($data[$field . '_collapsed']);
             }
-            if ($data[$field . '_hidden']) {
+            if (isset($data[$field . '_hidden'])) {
               print drupal_render($data[$field . '_hidden']);
             }
           ?></td>
