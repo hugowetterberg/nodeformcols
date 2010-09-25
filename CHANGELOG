@@ -1,0 +1,9 @@
+// $Id$
+
+Node form columns 6.x-1.x, xxxx-xx-xx
+------------------------------
+by voxpelli: No longer positions form fields that the access is denied to
+
+Node form columns 6.x-1.6, 2009-09-21
+------------------------------
+by Hugo Wetterberg: Released version 1.6
