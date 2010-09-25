@@ -1,10 +1,6 @@
 // $Id$
 
-Node form columns 6.x-1.x, xxxx-xx-xx
+Node form columns 7.x-1.x, xxxx-xx-xx
 ------------------------------
-by voxpelli: No longer positions form fields that the access is denied to
+#801804 by yhahn, voxpelli: Port to drupal 7
 #664840 by swentel, voxpelli: Fixed PHP notices
-
-Node form columns 6.x-1.6, 2009-09-21
-------------------------------
-by Hugo Wetterberg: Released version 1.6
