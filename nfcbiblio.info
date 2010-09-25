@@ -1,4 +1,4 @@
-; $Id: nfcbiblio.info,v 1.1 2009/04/24 21:21:53 hugowetterberg Exp $
+; $Id: nfcbiblio.info,v 1.1.2.1 2010/09/25 19:27:57 voxpelli Exp $
 name = Biblio compatability
 description = Adds support for biblio fields
 dependencies[] = nodeformcols

@@ -1,4 +1,4 @@
-; $Id: nodeformcols.info,v 1.3 2009/04/24 21:21:53 hugowetterberg Exp $
+; $Id: nodeformcols.info,v 1.3.2.1 2010/09/25 19:27:57 voxpelli Exp $
 name = Node form columns
 description = Separates the node forms into two columns and a footer.
 core = 7.x
