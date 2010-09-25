@@ -112,7 +112,7 @@ function nodeformscols_content_extra_fields($type_name, $variant) {
  * Implementation of hook_form_alter().
  */
 function nodeformcols_form_alter(&$form, $form_state, $form_id) {
-  if ('node-form' == $form['#id']) {
+  if (isset($form['#id']) && $form['#id']=='node-form') {
     drupal_alter('nodeformcols_pre_form', $form);
     $variant = isset($form['#nodeformcols_variant']) ? $form['#nodeformcols_variant'] : 'default';
     $placements = nodeformscols_field_placements($form['#node']->type, $variant);
@@ -157,7 +157,8 @@ function template_preprocess_node_form(&$aVars) {
 
   foreach ($form as $key => $field) {
     if (substr($key, 0, 1)=='#' ||
-        $field['#type']=='value' || $field['#type']=='hidden'|| $field['#type']=='token') {
+        (isset($field['#type']) && ($field['#type']=='value' || $field['#type']=='hidden'|| $field['#type']=='token')) ||
+        (isset($field['#access']) && $field['#access'] == FALSE)) {
       continue;
     }
 
@@ -186,7 +187,7 @@ function template_preprocess_node_form(&$aVars) {
 
   // Ensure that we have the footer wrapper so that
   // we clear the floating columns
-  if (!$has_elements['footer']) {
+  if (empty($has_elements['footer'])) {
     $has_elements['footer'] = TRUE;
     $regions['footer'][] = array(
       '#type' => 'markup',
