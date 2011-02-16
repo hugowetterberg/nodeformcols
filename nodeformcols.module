@@ -235,3 +235,14 @@ function nodeformcols_node_type($op, $info) {
       break;
   }
 }
+
+/**
+ * Implementation of hook_features_pipe_alter() for node component.
+ */
+function nodeformcols_features_pipe_node_alter(&$pipe, $data, &$export, $module_name) {
+  if (!empty($data) && module_exists('strongarm')) {
+    foreach ($data as $node_type) {
+      $pipe['variable'][] = 'nodeformscols_field_placements_'. $node_type .'_default';
+    }
+  }
+}
